@@ -57,6 +57,7 @@ async def start_command(client, message: Message):
             if referrer != user_id:
 
                 await add_referral(referrer)
+                await add_credits(referrer, 2)
 
                 ref_data = await get_user(
                     referrer
