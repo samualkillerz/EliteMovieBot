@@ -1,3 +1,4 @@
+from utils.cooldown import check_cooldown
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
