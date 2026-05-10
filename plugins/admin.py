@@ -1,5 +1,6 @@
 import secrets
 
+from utils.parser import normalize_query
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
@@ -86,7 +87,8 @@ async def admin_media_handler(client, message: Message):
         "unique_id": unique_id,
         "file_name": media.file_name,
         "deep_link": deep_link,
-        "message_id": forwarded.id
+        "message_id": forwarded.id,
+        "search_name": normalize_query(media.file_name)
     }
 
     await add_file(data)
