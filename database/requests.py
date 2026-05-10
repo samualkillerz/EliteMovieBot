@@ -45,3 +45,20 @@ async def mark_uploaded(title):
             }
         }
     )
+
+async def get_all_requests():
+
+    requests = requests_db.find(
+        {"uploaded": False}
+    ).sort("count", -1)
+
+    return await requests.to_list(
+        length=50
+    )
+
+
+async def delete_request(title):
+
+    await requests_db.delete_one(
+        {"title": title.lower()}
+    )
