@@ -44,3 +44,10 @@ async def unlock_user(user_id):
         {"user_id": user_id},
         {"$set": {"unlocked": True}}
     )
+
+async def deny_user(user_id):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {"$set": {"unlocked": False}}
+    )
