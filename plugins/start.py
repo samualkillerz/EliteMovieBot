@@ -12,6 +12,9 @@ from utils.checks import check_force_sub
 from config import FORCE_SUB_CHANNELS
 
 
+BOT_USERNAME = "LordVT4ProBot"
+
+
 @Client.on_message(filters.private & filters.command("start"))
 async def start_command(client, message: Message):
 
@@ -26,35 +29,45 @@ async def start_command(client, message: Message):
         message.from_user.id
     )
 
+    # DEBUG
+    print(f"Joined Status: {joined}")
+
     if not joined:
 
         buttons = []
 
         for channel in FORCE_SUB_CHANNELS:
 
-        chat = await client.get_chat(channel)
-        
-        username = chat.username
-        
-        if username:
-        
-            url = f"https://t.me/{username}"
-        
-        else:
-        
-            url = "https://t.me"
-        
+            chat = await client.get_chat(channel)
+
+            if chat.username:
+
+                url = f"https://t.me/{chat.username}"
+
+            else:
+
+                url = "https://t.me"
+
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        chat.title,
+                        url=url
+                    )
+                ]
+            )
+
         buttons.append(
             [
                 InlineKeyboardButton(
-                    chat.title,
-                    url=url
+                    "Try Again",
+                    url=f"https://t.me/{BOT_USERNAME}?start={payload}"
                 )
             ]
         )
 
         return await message.reply_text(
-            "Join all channels first.",
+            "⚠️ Join all channels first.",
             reply_markup=InlineKeyboardMarkup(
                 buttons
             )
@@ -94,5 +107,5 @@ async def start_command(client, message: Message):
         return
 
     await message.reply_text(
-        "Welcome to LordVT4ProBot"
+        "Welcome to LordVT4ProBot 👋"
     )
