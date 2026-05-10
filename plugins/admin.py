@@ -39,18 +39,44 @@ async def admin_media_handler(client, message: Message):
 
     if existing:
 
-        return await message.reply_text(
-            "File already exists."
+        existing_link = existing["deep_link"]
+
+        url = (
+            f"https://t.me/LordVT4ProBot"
+            f"?start=file_{existing_link}"
         )
 
+        buttons = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "Open Existing",
+                        url=url
+                    )
+                ]
+            ]
+        )
+
+        return await message.reply_text(
+            "File already exists.",
+            reply_markup=buttons
+        )
+
+    # COPY TO STORAGE
     forwarded = await message.copy(
         STORAGE_CHANNEL
+    )
+
+    # IMPORTANT FIX
+    stored_media = (
+        forwarded.document or
+        forwarded.video
     )
 
     deep_link = secrets.token_urlsafe(8)
 
     data = {
-        "file_id": media.file_id,
+        "file_id": stored_media.file_id,
         "unique_id": unique_id,
         "file_name": media.file_name,
         "deep_link": deep_link,
@@ -60,7 +86,8 @@ async def admin_media_handler(client, message: Message):
     await add_file(data)
 
     url = (
-        f"https://t.me/LordVT4ProBot?start=file_{deep_link}"
+        f"https://t.me/LordVT4ProBot"
+        f"?start=file_{deep_link}"
     )
 
     buttons = InlineKeyboardMarkup(
