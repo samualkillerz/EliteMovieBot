@@ -60,8 +60,7 @@ async def admin_media_handler(client, message: Message):
     await add_file(data)
 
     url = (
-        f"https://t.me/"
-        f"LordVT4ProBot?start=file_{deep_link}"
+        f"https://t.me/LordVT4ProBot?start=file_{deep_link}"
     )
 
     buttons = InlineKeyboardMarkup(
