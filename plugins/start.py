@@ -32,22 +32,23 @@ async def start_command(client, message: Message):
 
         for channel in FORCE_SUB_CHANNELS:
 
-            chat = await client.get_chat(channel)
-
-            buttons.append(
-                [
-                    InlineKeyboardButton(
-                        chat.title,
-                        url=chat.invite_link
-                    )
-                ]
-            )
-
+        chat = await client.get_chat(channel)
+        
+        username = chat.username
+        
+        if username:
+        
+            url = f"https://t.me/{username}"
+        
+        else:
+        
+            url = "https://t.me"
+        
         buttons.append(
             [
                 InlineKeyboardButton(
-                    "Try Again",
-                    url=f"https://t.me/LordVT4ProBot?start={payload}"
+                    chat.title,
+                    url=url
                 )
             ]
         )
