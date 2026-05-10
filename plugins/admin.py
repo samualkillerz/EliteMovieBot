@@ -15,6 +15,11 @@ from database.files import (
     add_file
 )
 
+from database.requests import (
+    get_request,
+    mark_uploaded
+)
+
 from database.mongo import files_db
 
 from config import STORAGE_CHANNEL
@@ -45,8 +50,8 @@ async def admin_media_handler(client, message: Message):
         existing_link = existing["deep_link"]
 
         url = (
-            f"https://t.me/"
-            f"{BOT_USERNAME}?start=file_{existing_link}"
+            f"https://t.me/{BOT_USERNAME}"
+            f"?start=file_{existing_link}"
         )
 
         buttons = InlineKeyboardMarkup(
@@ -65,12 +70,10 @@ async def admin_media_handler(client, message: Message):
             reply_markup=buttons
         )
 
-    # COPY TO STORAGE
     forwarded = await message.copy(
         STORAGE_CHANNEL
     )
 
-    # IMPORTANT FIX
     stored_media = (
         forwarded.document or
         forwarded.video
@@ -88,9 +91,35 @@ async def admin_media_handler(client, message: Message):
 
     await add_file(data)
 
+    title = media.file_name.lower()
+
+    request_data = await get_request(title)
+
+    if request_data:
+
+        await mark_uploaded(title)
+
+        for user in request_data["requesters"]:
+
+            try:
+
+                await client.send_message(
+                    user,
+                    f"""
+🎬 Requested Content Added
+
+📦 {media.file_name}
+
+Now Available ✅
+"""
+                )
+
+            except:
+                pass
+
     url = (
-        f"https://t.me/"
-        f"{BOT_USERNAME}?start=file_{deep_link}"
+        f"https://t.me/{BOT_USERNAME}"
+        f"?start=file_{deep_link}"
     )
 
     buttons = InlineKeyboardMarkup(
@@ -119,52 +148,3 @@ async def admin_media_handler(client, message: Message):
         "File Indexed Successfully ✅",
         reply_markup=buttons
     )
-
-
-@Client.on_callback_query()
-async def callbacks(client, query: CallbackQuery):
-
-    data = query.data
-
-    # GET LINK
-    if data.startswith("get#"):
-
-        deep_link = data.split("#")[1]
-
-        url = (
-            f"https://t.me/"
-            f"{BOT_USERNAME}?start=file_{deep_link}"
-        )
-
-        return await query.message.reply_text(
-            url
-        )
-
-    # DELETE
-    if data.startswith("delete#"):
-
-        deep_link = data.split("#")[1]
-
-        file_data = await files_db.find_one(
-            {"deep_link": deep_link}
-        )
-
-        if not file_data:
-
-            return await query.answer(
-                "Already deleted",
-                show_alert=True
-            )
-
-        await client.delete_messages(
-            chat_id=STORAGE_CHANNEL,
-            message_ids=file_data["message_id"]
-        )
-
-        await files_db.delete_one(
-            {"deep_link": deep_link}
-        )
-
-        await query.message.edit_text(
-            "Deleted Successfully ✅"
-        )
