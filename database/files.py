@@ -16,13 +16,19 @@ async def add_file(data):
 
 async def search_files(query):
 
+    from utils.parser import normalize_query
+
+    query = normalize_query(query)
+
     files = files_db.find(
         {
-            "file_name": {
+            "search_name": {
                 "$regex": query,
                 "$options": "i"
             }
         }
     ).limit(10)
 
-    return await files.to_list(length=10)
+    return await files.to_list(
+        length=10
+    )
