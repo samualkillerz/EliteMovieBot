@@ -32,3 +32,43 @@ async def search_files(query):
     return await files.to_list(
         length=10
     )
+
+async def get_file_by_link(link):
+
+    return await files_db.find_one(
+        {"deep_link": link}
+    )
+
+
+async def update_file_name(
+    link,
+    new_name,
+    search_name
+):
+
+    await files_db.update_one(
+        {"deep_link": link},
+        {
+            "$set": {
+                "file_name": new_name,
+                "search_name": search_name
+            }
+        }
+    )
+
+
+async def update_deep_link(
+    old_link,
+    new_link
+):
+
+    await files_db.update_one(
+        {"deep_link": old_link},
+        {
+            "$set": {
+                "deep_link": new_link
+            }
+        }
+    )
+
+
