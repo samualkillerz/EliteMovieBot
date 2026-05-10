@@ -16,13 +16,12 @@ from database.requests import (
 
 
 @Client.on_message(
+    filters.private &
     filters.command("requests")
 )
 async def requests_panel(client, message: Message):
 
-    if not is_admin(
-        message.from_user.id
-    ):
+    if not is_admin(message.from_user.id):
         return
 
     requests = await get_all_requests()
@@ -73,14 +72,13 @@ async def request_callbacks(
 
     data = query.data
 
+    # MARK UPLOADED
     if data.startswith("done#"):
 
-        if not is_admin(
-            query.from_user.id
-        ):
+        if not is_admin(query.from_user.id):
             return
 
-        title = data.split("#")[1]
+        title = data.split("#", 1)[1]
 
         await mark_uploaded(title)
 
@@ -88,14 +86,13 @@ async def request_callbacks(
             f"✅ Marked Uploaded:\n{title}"
         )
 
+    # DELETE REQUEST
     if data.startswith("delreq#"):
 
-        if not is_admin(
-            query.from_user.id
-        ):
+        if not is_admin(query.from_user.id):
             return
 
-        title = data.split("#")[1]
+        title = data.split("#", 1)[1]
 
         await delete_request(title)
 
