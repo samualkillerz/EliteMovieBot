@@ -52,3 +52,27 @@ async def deny_user(user_id):
         {"user_id": user_id},
         {"$set": {"unlocked": False}}
     )
+
+async def add_credits(user_id, amount):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$inc": {
+                "credits": amount
+            }
+        }
+    )
+
+
+async def remove_credits(user_id, amount):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$inc": {
+                "credits": -amount
+            }
+        }
+    )
+
