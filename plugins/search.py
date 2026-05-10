@@ -25,6 +25,27 @@ BOT_USERNAME = "LordVT4ProBot"
 async def search_handler(client, message: Message):
 
     query = message.text.strip()
+    # COOLDOWN
+    cooldown_time = 3
+    
+    if message.chat.type in [
+        "group",
+        "supergroup"
+    ]:
+        cooldown_time = 8
+    
+    remaining = check_cooldown(
+        message.from_user.id,
+        cooldown_time
+    )
+    
+    if remaining > 0:
+    
+        return await message.reply_text(
+            f"⏳ Wait {remaining}s before searching again."
+        )
+
+    
 
     # IGNORE SHORT SEARCHES
     if len(query) < 3:
