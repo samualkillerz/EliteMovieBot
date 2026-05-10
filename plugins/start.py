@@ -7,6 +7,14 @@ from pyrogram.types import (
 
 from database.mongo import files_db
 
+from database.users import (
+    is_user_exist,
+    add_user,
+    get_user,
+    add_referral,
+    unlock_user
+)
+
 from utils.checks import check_force_sub
 
 from config import FORCE_SUB_CHANNELS
@@ -18,19 +26,42 @@ BOT_USERNAME = "LordVT4ProBot"
 @Client.on_message(filters.private & filters.command("start"))
 async def start_command(client, message: Message):
 
+    user_id = message.from_user.id
+    name = message.from_user.first_name
+
     payload = None
 
     if len(message.command) > 1:
         payload = message.command[1]
 
+    # REGISTER USER
+    if not await is_user_exist(user_id):
+        await add_user(user_id, name)
+
+        # REFERRAL SYSTEM
+        if payload and payload.startswith("ref_"):
+
+            referrer = int(
+                payload.replace("ref_", "")
+            )
+
+            if referrer != user_id:
+
+                await add_referral(referrer)
+
+                ref_data = await get_user(
+                    referrer
+                )
+
+                if ref_data["referrals"] >= 1:
+
+                    await unlock_user(referrer)
+
     # FORCE SUB CHECK
     joined = await check_force_sub(
         client,
-        message.from_user.id
+        user_id
     )
-
-    # DEBUG
-    print(f"Joined Status: {joined}")
 
     if not joined:
 
@@ -42,7 +73,10 @@ async def start_command(client, message: Message):
 
             if chat.username:
 
-                url = f"https://t.me/{chat.username}"
+                url = (
+                    f"https://t.me/"
+                    f"{chat.username}"
+                )
 
             else:
 
@@ -71,6 +105,39 @@ async def start_command(client, message: Message):
             reply_markup=InlineKeyboardMarkup(
                 buttons
             )
+        )
+
+    # CHECK USER ACCESS
+    user_data = await get_user(user_id)
+
+    if not user_data["unlocked"]:
+
+        referral_link = (
+            f"https://t.me/{BOT_USERNAME}"
+            f"?start=ref_{user_id}"
+        )
+
+        buttons = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "Invite Friend",
+                        url=f"https://t.me/share/url?url={referral_link}"
+                    )
+                ]
+            ]
+        )
+
+        return await message.reply_text(
+            f"""
+🔒 Bot Locked
+
+Invite 1 user to unlock access.
+
+Your Referrals:
+{user_data['referrals']}/1
+""",
+            reply_markup=buttons
         )
 
     # FILE DELIVERY
@@ -107,5 +174,5 @@ async def start_command(client, message: Message):
         return
 
     await message.reply_text(
-        "Welcome to LordVT4ProBot 👋"
+        "✅ Access Unlocked"
     )
