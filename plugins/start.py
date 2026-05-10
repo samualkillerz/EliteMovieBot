@@ -19,9 +19,9 @@ async def start_command(client, message: Message):
         await add_user(user_id, name)
 
     await message.reply_text(
-        f\"\"\"
-Hello {name}
+        f"""
+Hello {name} 👋
 
-Welcome to Veil Movies Bot.
-        \"\"\"
+Welcome to LordVT4ProBot
+"""
     )
