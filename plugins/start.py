@@ -1,7 +1,15 @@
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import (
+    Message,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
 
 from database.mongo import files_db
+
+from utils.checks import check_force_sub
+
+from config import FORCE_SUB_CHANNELS
 
 
 @Client.on_message(filters.private & filters.command("start"))
@@ -11,6 +19,45 @@ async def start_command(client, message: Message):
 
     if len(message.command) > 1:
         payload = message.command[1]
+
+    # FORCE SUB CHECK
+    joined = await check_force_sub(
+        client,
+        message.from_user.id
+    )
+
+    if not joined:
+
+        buttons = []
+
+        for channel in FORCE_SUB_CHANNELS:
+
+            chat = await client.get_chat(channel)
+
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        chat.title,
+                        url=chat.invite_link
+                    )
+                ]
+            )
+
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    "Try Again",
+                    url=f"https://t.me/LordVT4ProBot?start={payload}"
+                )
+            ]
+        )
+
+        return await message.reply_text(
+            "Join all channels first.",
+            reply_markup=InlineKeyboardMarkup(
+                buttons
+            )
+        )
 
     # FILE DELIVERY
     if payload and payload.startswith("file_"):
