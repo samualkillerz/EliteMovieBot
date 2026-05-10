@@ -63,17 +63,28 @@ async def admin_media_handler(client, message: Message):
         f"LordVT4ProBot?start=file_{deep_link}"
     )
 
+
     buttons = InlineKeyboardMarkup(
+    [
         [
-            [
-                InlineKeyboardButton(
-                    "Get Link",
-                    url=url
+            InlineKeyboardButton(
+                "Open Link",
+                url=url
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "Delete",
+                callback_data=f"delete#{deep_link}"
+            ),
+
+            InlineKeyboardButton(
+                "Get Link",
+                callback_data=f"get#{deep_link}"
                 )
             ]
         ]
     )
-
     await message.reply_text(
         "File Indexed Successfully ✅",
         reply_markup=buttons
