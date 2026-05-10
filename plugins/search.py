@@ -29,6 +29,10 @@ async def search_handler(client, message: Message):
     if len(query) < 3:
         return
 
+    # IGNORE ADMIN COMMANDS
+    if query.startswith("/"):
+        return
+
     results = await search_files(query)
 
     # RESULTS FOUND
@@ -52,14 +56,28 @@ async def search_handler(client, message: Message):
                 ]
             )
 
+        text = "🎬 Search Results"
+
+        # GROUP MODE
+        if message.chat.type in [
+            "group",
+            "supergroup"
+        ]:
+
+            text = (
+                "🎬 Results Found\n"
+                "Open privately using buttons below."
+            )
+
         return await message.reply_text(
-            "🎬 Search Results",
+            text,
             reply_markup=InlineKeyboardMarkup(
                 buttons
             )
         )
 
     # NOT FOUND
+
     request_data = await get_request(query)
 
     if not request_data:
@@ -76,6 +94,17 @@ async def search_handler(client, message: Message):
             message.from_user.id
         )
 
+    # GROUP RESPONSE
+    if message.chat.type in [
+        "group",
+        "supergroup"
+    ]:
+
+        return await message.reply_text(
+            "❌ Not found.\nRequest added ✅"
+        )
+
+    # PRIVATE RESPONSE
     buttons = InlineKeyboardMarkup(
         [
             [
@@ -93,7 +122,7 @@ async def search_handler(client, message: Message):
 
 Your request has been added.
 
-Example format:
+Example:
 Iron Man 2008
 """,
         reply_markup=buttons
