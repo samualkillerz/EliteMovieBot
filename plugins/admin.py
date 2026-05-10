@@ -71,6 +71,23 @@ async def admin_media_handler(client, message: Message):
                         "Open Existing",
                         url=url
                     )
+                ],
+                [
+                    InlineKeyboardButton(
+                        "Rename",
+                        callback_data=f"rename|{existing_link}"
+                    ),
+        
+                    InlineKeyboardButton(
+                        "New Link",
+                        callback_data=f"newlink|{existing_link}"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        "Delete",
+                        callback_data=f"delete|{existing_link}"
+                    )
                 ]
             ]
         )
