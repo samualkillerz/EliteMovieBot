@@ -1,7 +1,5 @@
-from pyrogram import filters
+from pyrogram import Client, filters
 from pyrogram.types import Message
-
-from main import app
 
 from database.users import (
     is_user_exist,
@@ -9,7 +7,7 @@ from database.users import (
 )
 
 
-@app.on_message(filters.private & filters.command("start"))
+@Client.on_message(filters.private & filters.command("start"))
 async def start_command(client, message: Message):
 
     user_id = message.from_user.id
