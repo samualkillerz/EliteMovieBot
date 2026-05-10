@@ -2,7 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
     InlineKeyboardMarkup,
-    InlineKeyboardButton
+    InlineKeyboardButton,
+    CallbackQuery
 )
 
 from database.mongo import files_db
@@ -18,7 +19,10 @@ from database.users import (
 from utils.checks import check_force_sub
 from utils.filters import is_admin
 
-from config import FORCE_SUB_CHANNELS
+from config import (
+    FORCE_SUB_CHANNELS,
+    ADMINS
+)
 
 
 BOT_USERNAME = "LordVT4ProBot"
@@ -132,6 +136,12 @@ async def start_command(client, message: Message):
                         "Invite Friend",
                         url=f"https://t.me/share/url?url={referral_link}"
                     )
+                ],
+                [
+                    InlineKeyboardButton(
+                        "Request Access",
+                        callback_data=f"request#{user_id}"
+                    )
                 ]
             ]
         )
@@ -184,3 +194,94 @@ Your Referrals:
     await message.reply_text(
         "✅ Access Unlocked"
     )
+
+
+@Client.on_callback_query()
+async def approval_callbacks(client, query: CallbackQuery):
+
+    data = query.data
+
+    # USER REQUEST ACCESS
+    if data.startswith("request#"):
+
+        user_id = int(
+            data.split("#")[1]
+        )
+
+        user = query.from_user
+
+        buttons = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "Approve",
+                        callback_data=f"approve#{user_id}"
+                    ),
+
+                    InlineKeyboardButton(
+                        "Deny",
+                        callback_data=f"deny#{user_id}"
+                    )
+                ]
+            ]
+        )
+
+        for admin_id in ADMINS:
+
+            await client.send_message(
+                admin_id,
+                f"""
+🔔 New Access Request
+
+👤 User:
+{user.first_name}
+
+🆔 ID:
+{user_id}
+""",
+                reply_markup=buttons
+            )
+
+        return await query.answer(
+            "Request sent to admins."
+        )
+
+    # APPROVE USER
+    if data.startswith("approve#"):
+
+        if not is_admin(query.from_user.id):
+            return
+
+        target = int(
+            data.split("#")[1]
+        )
+
+        await unlock_user(target)
+
+        await client.send_message(
+            target,
+            "✅ Admin approved your access."
+        )
+
+        return await query.message.edit_text(
+            "User approved successfully."
+        )
+
+    # DENY USER
+    if data.startswith("deny#"):
+
+        if not is_admin(query.from_user.id):
+            return
+
+        target = int(
+            data.split("#")[1]
+        )
+
+        await client.send_message(
+            target,
+            "❌ Access denied.\nInvite users to unlock."
+        )
+
+        return await query.message.edit_text(
+            "User denied."
+        )
