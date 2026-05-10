@@ -41,16 +41,13 @@ async def start_command(client, message: Message):
     if len(message.command) > 1:
         payload = message.command[1]
 
-    # REGISTER USER
     if not await is_user_exist(user_id):
 
         await add_user(user_id, name)
 
-        # AUTO UNLOCK ADMINS
         if admin:
             await unlock_user(user_id)
 
-        # REFERRAL SYSTEM
         if payload and payload.startswith("ref_"):
 
             referrer = int(
@@ -69,7 +66,6 @@ async def start_command(client, message: Message):
 
                     await unlock_user(referrer)
 
-    # FORCE SUB CHECK
     joined = await check_force_sub(
         client,
         user_id
@@ -119,7 +115,6 @@ async def start_command(client, message: Message):
             )
         )
 
-    # CHECK USER ACCESS
     user_data = await get_user(user_id)
 
     if not user_data["unlocked"] and not admin:
@@ -158,7 +153,6 @@ Your Referrals:
             reply_markup=buttons
         )
 
-    # FILE DELIVERY
     if payload and payload.startswith("file_"):
 
         deep_link = payload.replace(
@@ -194,94 +188,3 @@ Your Referrals:
     await message.reply_text(
         "✅ Access Unlocked"
     )
-
-
-@Client.on_callback_query()
-async def approval_callbacks(client, query: CallbackQuery):
-
-    data = query.data
-
-    # USER REQUEST ACCESS
-    if data.startswith("request#"):
-
-        user_id = int(
-            data.split("#")[1]
-        )
-
-        user = query.from_user
-
-        buttons = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "Approve",
-                        callback_data=f"approve#{user_id}"
-                    ),
-
-                    InlineKeyboardButton(
-                        "Deny",
-                        callback_data=f"deny#{user_id}"
-                    )
-                ]
-            ]
-        )
-
-        for admin_id in ADMINS:
-
-            await client.send_message(
-                admin_id,
-                f"""
-🔔 New Access Request
-
-👤 User:
-{user.first_name}
-
-🆔 ID:
-{user_id}
-""",
-                reply_markup=buttons
-            )
-
-        return await query.answer(
-            "Request sent to admins."
-        )
-
-    # APPROVE USER
-    if data.startswith("approve#"):
-
-        if not is_admin(query.from_user.id):
-            return
-
-        target = int(
-            data.split("#")[1]
-        )
-
-        await unlock_user(target)
-
-        await client.send_message(
-            target,
-            "✅ Admin approved your access."
-        )
-
-        return await query.message.edit_text(
-            "User approved successfully."
-        )
-
-    # DENY USER
-    if data.startswith("deny#"):
-
-        if not is_admin(query.from_user.id):
-            return
-
-        target = int(
-            data.split("#")[1]
-        )
-
-        await client.send_message(
-            target,
-            "❌ Access denied.\nInvite users to unlock."
-        )
-
-        return await query.message.edit_text(
-            "User denied."
-        )
