@@ -1,12 +1,21 @@
 import secrets
 
-from utils.parser import normalize_query
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
     CallbackQuery
+)
+
+from utils.parser import normalize_query
+
+from database.files import (
+    get_file_by_unique,
+    add_file,
+    get_file_by_link,
+    update_file_name,
+    update_deep_link
 )
 
 from utils.filters import is_admin
