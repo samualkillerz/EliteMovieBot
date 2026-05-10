@@ -32,20 +32,38 @@ async def requests_panel(client, message: Message):
             "No pending requests."
         )
 
-    text = "📌 Pending Requests\n\n"
-
     for req in requests:
 
         title = req.get("title", "Unknown")
 
         count = req.get("count", 0)
 
-        text += (
-            f"🎬 {title.title()}\n"
-            f"📊 Requests: {count}\n\n"
+        safe_title = title[:40]
+
+        buttons = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "✅ Uploaded",
+                        callback_data=f"done|{safe_title}"
+                    ),
+
+                    InlineKeyboardButton(
+                        "🗑 Delete",
+                        callback_data=f"delete|{safe_title}"
+                    )
+                ]
+            ]
         )
 
-    await message.reply_text(text)
+        await message.reply_text(
+            f"""
+🎬 {title.title()}
+
+📊 Requests: {count}
+""",
+            reply_markup=buttons
+        )
 
 
 @Client.on_callback_query()
@@ -56,34 +74,44 @@ async def request_callbacks(
 
     data = query.data
 
-    if data.startswith("done#"):
+    # MARK UPLOADED
+    if data.startswith("done|"):
 
         if not is_admin(query.from_user.id):
             return
 
         title = data.split(
-            "#",
+            "|",
             1
         )[1]
 
         await mark_uploaded(title)
 
         return await query.message.edit_text(
-            f"✅ Uploaded:\n{title}"
+            f"""
+✅ Marked Uploaded
+
+🎬 {title.title()}
+"""
         )
 
-    if data.startswith("delreq#"):
+    # DELETE REQUEST
+    if data.startswith("delete|"):
 
         if not is_admin(query.from_user.id):
             return
 
         title = data.split(
-            "#",
+            "|",
             1
         )[1]
 
         await delete_request(title)
 
         return await query.message.edit_text(
-            f"🗑 Deleted:\n{title}"
+            f"""
+🗑 Request Deleted
+
+🎬 {title.title()}
+"""
         )
