@@ -23,7 +23,8 @@ async def check_force_sub(client, user_id):
         except UserNotParticipant:
             return False
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     return True
