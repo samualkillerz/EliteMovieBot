@@ -46,13 +46,17 @@ async def mark_uploaded(title):
         }
     )
 
+
 async def get_all_requests():
 
-    requests = requests_db.find(
+    cursor = requests_db.find(
         {"uploaded": False}
-    ).sort("count", -1)
+    ).sort(
+        "count",
+        -1
+    )
 
-    return await requests.to_list(
+    return await cursor.to_list(
         length=50
     )
 
