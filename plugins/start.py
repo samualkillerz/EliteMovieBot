@@ -16,6 +16,7 @@ from database.users import (
 )
 
 from utils.checks import check_force_sub
+from utils.filters import is_admin
 
 from config import FORCE_SUB_CHANNELS
 
@@ -29,6 +30,8 @@ async def start_command(client, message: Message):
     user_id = message.from_user.id
     name = message.from_user.first_name
 
+    admin = is_admin(user_id)
+
     payload = None
 
     if len(message.command) > 1:
@@ -36,7 +39,12 @@ async def start_command(client, message: Message):
 
     # REGISTER USER
     if not await is_user_exist(user_id):
+
         await add_user(user_id, name)
+
+        # AUTO UNLOCK ADMINS
+        if admin:
+            await unlock_user(user_id)
 
         # REFERRAL SYSTEM
         if payload and payload.startswith("ref_"):
@@ -63,7 +71,7 @@ async def start_command(client, message: Message):
         user_id
     )
 
-    if not joined:
+    if not joined and not admin:
 
         buttons = []
 
@@ -110,7 +118,7 @@ async def start_command(client, message: Message):
     # CHECK USER ACCESS
     user_data = await get_user(user_id)
 
-    if not user_data["unlocked"]:
+    if not user_data["unlocked"] and not admin:
 
         referral_link = (
             f"https://t.me/{BOT_USERNAME}"
