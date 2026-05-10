@@ -7,9 +7,6 @@ from database.mongo import files_db
 @Client.on_message(filters.private & filters.command("start"))
 async def start_command(client, message: Message):
 
-    # DEBUG
-    print(message.text)
-
     payload = None
 
     if len(message.command) > 1:
