@@ -114,8 +114,12 @@ async def admin_media_handler(client, message: Message):
 
     deep_link = secrets.token_urlsafe(8)
 
+    cleaned_name = clean_file_name(
+    media.file_name
+    )
+    
     normalized_name = normalize_query(
-        media.file_name
+        cleaned_name
     )
 
     compact_name = normalized_name.replace(
