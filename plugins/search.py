@@ -1,5 +1,4 @@
 from utils.cooldown import check_cooldown
-from utils.tmdb import search_tmdb
 
 from pyrogram import Client, filters
 from pyrogram.types import (
@@ -16,6 +15,8 @@ from database.requests import (
     add_request_user
 )
 
+from plugins.admin import rename_cache
+
 
 BOT_USERNAME = "LordVT4ProBot"
 
@@ -31,6 +32,10 @@ BOT_USERNAME = "LordVT4ProBot"
 async def search_handler(client, message: Message):
 
     query = message.text.strip()
+
+    # IGNORE RENAME USERS
+    if message.from_user.id in rename_cache:
+        return
 
     # IGNORE COMMANDS
     if query.startswith("/"):
@@ -86,7 +91,6 @@ async def search_handler(client, message: Message):
 
         text = "🎬 Search Results"
 
-        # GROUP MODE
         if message.chat.type in [
             "group",
             "supergroup"
@@ -104,51 +108,34 @@ async def search_handler(client, message: Message):
             )
         )
 
-    
-    # TMDB CHECK
-    movie = await search_tmdb(query)
-    
-    if not movie:
-    
-        return await message.reply_text(
-            """
-    ❌ Movie/Series not found.
-    
-    Use proper format.
-    
-    Example:
-    Iron Man 2008
-    """
-        )
-    
-    # SAVE REQUEST
+    # NOT FOUND
     request_data = await get_request(query)
-    
+
     if not request_data:
-    
+
         await create_request(
             query,
             message.from_user.id
         )
-    
+
     else:
-    
+
         await add_request_user(
             query,
             message.from_user.id
         )
+
     # GROUP RESPONSE
     if message.chat.type in [
         "group",
         "supergroup"
     ]:
 
-    return await message.reply_text(
-        f"✅ Request Added: {movie['title']} ({movie['year']})"
-    )
-    
-    # PRIVATE RESPONSE
+        return await message.reply_text(
+            "❌ Not found.\nRequest added ✅"
+        )
 
+    # PRIVATE RESPONSE
     buttons = InlineKeyboardMarkup(
         [
             [
@@ -159,26 +146,15 @@ async def search_handler(client, message: Message):
             ]
         ]
     )
-    
-    caption = f"""
-    🎬 {movie['title']} ({movie['year']})
-    
-    ⭐ Rating: {movie['rating']}
-    
-    📝 {movie['overview'][:200]}
-    
-    ✅ Request Added Successfully
-    """
-    
-    if movie['poster']:
-    
-        return await message.reply_photo(
-            photo=movie['poster'],
-            caption=caption,
-            reply_markup=buttons
-        )
-    
+
     return await message.reply_text(
-        caption,
+        """
+❌ No files found.
+
+Your request has been added.
+
+Example:
+Iron Man 2008
+""",
         reply_markup=buttons
     )
