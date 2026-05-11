@@ -148,6 +148,7 @@ async def search_handler(client, message: Message):
         )
 
     # PRIVATE RESPONSE
+
     buttons = InlineKeyboardMarkup(
         [
             [
@@ -158,17 +159,26 @@ async def search_handler(client, message: Message):
             ]
         ]
     )
-
+    
+    caption = f"""
+    🎬 {movie['title']} ({movie['year']})
+    
+    ⭐ Rating: {movie['rating']}
+    
+    📝 {movie['overview'][:200]}
+    
+    ✅ Request Added Successfully
+    """
+    
+    if movie['poster']:
+    
+        return await message.reply_photo(
+            photo=movie['poster'],
+            caption=caption,
+            reply_markup=buttons
+        )
+    
     return await message.reply_text(
-        """
-❌ No files found.
-
-Your request has been added.
-
-Example:
-<code>Dangal 2016</code>,
-<code>Sholay 1975</code>, and 
-<code>Dilwale Dulhania Le Jayenge 1995</code>
-""",
+        caption,
         reply_markup=buttons
     )
