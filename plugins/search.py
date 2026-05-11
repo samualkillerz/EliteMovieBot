@@ -143,10 +143,10 @@ async def search_handler(client, message: Message):
         "supergroup"
     ]:
 
-        return await message.reply_text(
-            "❌ Not found.\nRequest added ✅"
-        )
-
+    return await message.reply_text(
+        f"✅ Request Added: {movie['title']} ({movie['year']})"
+    )
+    
     # PRIVATE RESPONSE
 
     buttons = InlineKeyboardMarkup(
