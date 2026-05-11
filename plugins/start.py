@@ -229,7 +229,34 @@ Your Referrals:
 ♥️ 𝗧𝗲𝗮𝗺 ➜ @ZLIXOfficial
 """
             )
+    reply_markup=InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "Updates",
+                    url="https://t.me/ZLIXOfficial"
+                ),
 
+                InlineKeyboardButton(
+                    "Movies",
+                    url="https://t.me/Moviewallahz_Official"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "Support",
+                    url="https://t.me/ZLIXSupport"
+                ),
+
+                InlineKeyboardButton(
+                    "Premium",
+                    url="https://t.me/ZlixPremium"
+                )
+            ]
+        ]
+    )
+)
         except Exception as e:
 
             print(e)
