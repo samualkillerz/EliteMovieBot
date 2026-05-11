@@ -1,6 +1,7 @@
 from pyrogram import Client
 from config import *
 
+print("MAIN FILE RUNNING")
 app = Client(
     "LordVT4",
     api_id=API_ID,
