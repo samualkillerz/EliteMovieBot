@@ -36,7 +36,12 @@ rename_cache = {}
 
 @Client.on_message(
     filters.private &
-    (filters.document | filters.video)
+    filters.text &
+    ~filters.command([
+        "start",
+        "requests",
+        "credits"
+    ])
 )
 async def admin_media_handler(client, message: Message):
 
