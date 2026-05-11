@@ -149,9 +149,9 @@ async def search_handler(client, message: Message):
 Your request has been added.
 
 Example:
-'Dangal 2016',
-'Sholay 1975', and 
-'Dilwale Dulhania Le Jayenge 1995'
+<code>Dangal 2016</code>,
+<code>Sholay 1975</code>, and 
+<code>Dilwale Dulhania Le Jayenge 1995</code>
 """,
         reply_markup=buttons
     )
