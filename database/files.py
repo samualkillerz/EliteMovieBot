@@ -14,7 +14,6 @@ async def add_file(data):
     await files_db.insert_one(data)
 
 
-
 async def search_files(query):
 
     query = normalize_query(query)
@@ -48,7 +47,6 @@ async def search_files(query):
     )
 
 
-
 async def get_file_by_link(link):
 
     return await files_db.find_one(
@@ -62,12 +60,18 @@ async def update_file_name(
     search_name
 ):
 
+    compact_name = search_name.replace(
+        " ",
+        ""
+    )
+
     await files_db.update_one(
         {"deep_link": link},
         {
             "$set": {
                 "file_name": new_name,
-                "search_name": search_name
+                "search_name": search_name,
+                "search_compact": compact_name
             }
         }
     )
@@ -86,5 +90,3 @@ async def update_deep_link(
             }
         }
     )
-
-
