@@ -34,14 +34,13 @@ BOT_USERNAME = "LordVT4ProBot"
 rename_cache = {}
 
 
+# ==========================================
+# MEDIA INDEX HANDLER
+# ==========================================
+
 @Client.on_message(
     filters.private &
-    filters.text &
-    ~filters.command([
-        "start",
-        "requests",
-        "credits"
-    ])
+    (filters.document | filters.video)
 )
 async def admin_media_handler(client, message: Message):
 
@@ -51,6 +50,9 @@ async def admin_media_handler(client, message: Message):
         return
 
     media = message.document or message.video
+
+    if not media:
+        return
 
     unique_id = media.file_unique_id
 
@@ -111,32 +113,39 @@ async def admin_media_handler(client, message: Message):
 
     deep_link = secrets.token_urlsafe(8)
 
+    normalized_name = normalize_query(
+        media.file_name
+    )
+
+    compact_name = normalized_name.replace(
+        " ",
+        ""
+    )
+
     data = {
         "file_id": stored_media.file_id,
         "unique_id": unique_id,
         "file_name": media.file_name,
         "deep_link": deep_link,
         "message_id": forwarded.id,
-        "search_name": normalize_query(
-            media.file_name
-        ),
-        "search_compact": normalize_query(
-            media.file_name
-        ).replace(" ", ""),
+
+        "search_name": normalized_name,
+
+        "search_compact": compact_name
     }
 
     await add_file(data)
 
     # AUTO REQUEST MATCH
-    title = normalize_query(
-        media.file_name
+    request_data = await get_request(
+        normalized_name
     )
-
-    request_data = await get_request(title)
 
     if request_data:
 
-        await mark_uploaded(title)
+        await mark_uploaded(
+            normalized_name
+        )
 
         for user in request_data["requesters"]:
 
@@ -190,6 +199,10 @@ Now Available ✅
     )
 
 
+# ==========================================
+# CALLBACKS
+# ==========================================
+
 @Client.on_callback_query()
 async def callbacks(client, query: CallbackQuery):
 
@@ -223,10 +236,15 @@ async def callbacks(client, query: CallbackQuery):
                 show_alert=True
             )
 
-        await client.delete_messages(
-            STORAGE_CHANNEL,
-            file_data["message_id"]
-        )
+        try:
+
+            await client.delete_messages(
+                STORAGE_CHANNEL,
+                file_data["message_id"]
+            )
+
+        except:
+            pass
 
         await files_db.delete_one(
             {"deep_link": link}
@@ -271,6 +289,10 @@ async def callbacks(client, query: CallbackQuery):
         )
 
 
+# ==========================================
+# RENAME HANDLER
+# ==========================================
+
 @Client.on_message(
     filters.private &
     filters.text
@@ -288,14 +310,34 @@ async def rename_handler(
     if user_id not in rename_cache:
         return
 
+    new_name = message.text.strip()
+
+    if not new_name:
+        return
+
     link = rename_cache[user_id]
 
-    new_name = message.text.strip()
+    normalized_name = normalize_query(
+        new_name
+    )
 
     await update_file_name(
         link,
         new_name,
-        normalize_query(new_name)
+        normalized_name
+    )
+
+    await files_db.update_one(
+        {"deep_link": link},
+        {
+            "$set": {
+                "search_compact":
+                normalized_name.replace(
+                    " ",
+                    ""
+                )
+            }
+        }
     )
 
     del rename_cache[user_id]
