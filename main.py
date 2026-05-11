@@ -1,4 +1,4 @@
-from pyrogram import Client, idle
+from pyrogram import Client
 from config import *
 
 app = Client(
@@ -8,5 +8,7 @@ app = Client(
     bot_token=BOT_TOKEN,
     plugins=dict(root="plugins")
 )
+
+print("✅ Bot Started Successfully")
 
 app.run()
