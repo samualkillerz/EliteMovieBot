@@ -19,5 +19,5 @@ FORCE_SUB_CHANNELS = list(
 )
 
 BOT_USERNAME = getenv("BOT_USERNAME")
-TDDB_API = getenv(TMDB_API)
+TMDB_API = getenv(TMDB_API)
 
