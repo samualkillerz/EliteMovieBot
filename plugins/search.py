@@ -1,4 +1,5 @@
 from utils.cooldown import check_cooldown
+
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
@@ -20,41 +21,45 @@ BOT_USERNAME = "LordVT4ProBot"
 
 @Client.on_message(
     filters.text &
-    ~filters.command("start")
+    ~filters.command([
+        "start",
+        "requests",
+        "credits"
+    ])
 )
 async def search_handler(client, message: Message):
 
     query = message.text.strip()
+
+    # IGNORE COMMANDS
+    if query.startswith("/"):
+        return
+
+    # IGNORE SHORT SEARCHES
+    if len(query) < 2:
+        return
+
     # COOLDOWN
     cooldown_time = 3
-    
+
     if message.chat.type in [
         "group",
         "supergroup"
     ]:
         cooldown_time = 8
-    
+
     remaining = check_cooldown(
         message.from_user.id,
         cooldown_time
     )
-    
+
     if remaining > 0:
-    
+
         return await message.reply_text(
             f"⏳ Wait {remaining}s before searching again."
         )
 
-    
-
-    # IGNORE SHORT SEARCHES
-    if len(query) < 3:
-        return
-
-    # IGNORE ADMIN COMMANDS
-    if query.startswith("/"):
-        return
-
+    # SEARCH DATABASE
     results = await search_files(query)
 
     # RESULTS FOUND
@@ -99,7 +104,6 @@ async def search_handler(client, message: Message):
         )
 
     # NOT FOUND
-
     request_data = await get_request(query)
 
     if not request_data:
@@ -139,7 +143,7 @@ async def search_handler(client, message: Message):
     )
 
     return await message.reply_text(
-        f"""
+        """
 ❌ No files found.
 
 Your request has been added.
