@@ -1,4 +1,5 @@
 from database.mongo import files_db
+from utils.parser import normalize_query
 
 
 async def get_file_by_unique(unique_id):
@@ -16,14 +17,16 @@ async def add_file(data):
 
 async def search_files(query):
 
-    from utils.parser import normalize_query
-
     query = normalize_query(query)
+
+    words = query.split()
+
+    regex_pattern = ".*".join(words)
 
     files = files_db.find(
         {
             "search_name": {
-                "$regex": query,
+                "$regex": regex_pattern,
                 "$options": "i"
             }
         }
