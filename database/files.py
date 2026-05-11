@@ -19,22 +19,35 @@ async def search_files(query):
 
     query = normalize_query(query)
 
-    words = query.split()
-
-    regex_pattern = ".*".join(words)
+    compact_query = query.replace(
+        " ",
+        ""
+    )
 
     files = files_db.find(
         {
-            "search_name": {
-                "$regex": regex_pattern,
-                "$options": "i"
-            }
+            "$or": [
+                {
+                    "search_name": {
+                        "$regex": query,
+                        "$options": "i"
+                    }
+                },
+                {
+                    "search_compact": {
+                        "$regex": compact_query,
+                        "$options": "i"
+                    }
+                }
+            ]
         }
     ).limit(10)
 
     return await files.to_list(
         length=10
     )
+
+
 
 async def get_file_by_link(link):
 
