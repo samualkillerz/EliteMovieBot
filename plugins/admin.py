@@ -1,5 +1,7 @@
 import secrets
 
+from utils.cleaner import clean_file_name
+
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
@@ -124,7 +126,7 @@ async def admin_media_handler(client, message: Message):
     data = {
         "file_id": stored_media.file_id,
         "unique_id": unique_id,
-        "file_name": media.file_name,
+        "file_name": clean_file_name(media.file_name),
         "deep_link": deep_link,
         "message_id": forwarded.id,
 
