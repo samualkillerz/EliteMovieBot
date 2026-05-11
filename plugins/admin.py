@@ -15,7 +15,6 @@ from database.files import (
     get_file_by_unique,
     add_file,
     get_file_by_link,
-    update_file_name,
     update_deep_link
 )
 
@@ -295,7 +294,8 @@ async def callbacks(client, query: CallbackQuery):
 
 @Client.on_message(
     filters.private &
-    filters.text
+    filters.text,
+    group=10
 )
 async def rename_handler(
     client,
@@ -304,10 +304,16 @@ async def rename_handler(
 
     user_id = message.from_user.id
 
+    # ONLY HANDLE ACTIVE RENAME USERS
+    if user_id not in rename_cache:
+        return
+
+    # ADMIN CHECK
     if not is_admin(user_id):
         return
 
-    if user_id not in rename_cache:
+    # IGNORE COMMANDS
+    if message.text.startswith("/"):
         return
 
     new_name = message.text.strip()
@@ -321,25 +327,24 @@ async def rename_handler(
         new_name
     )
 
-    await update_file_name(
-        link,
-        new_name,
-        normalized_name
+    compact_name = normalized_name.replace(
+        " ",
+        ""
     )
 
+    # UPDATE DATABASE
     await files_db.update_one(
         {"deep_link": link},
         {
             "$set": {
-                "search_compact":
-                normalized_name.replace(
-                    " ",
-                    ""
-                )
+                "file_name": new_name,
+                "search_name": normalized_name,
+                "search_compact": compact_name
             }
         }
     )
 
+    # REMOVE FROM CACHE
     del rename_cache[user_id]
 
     await message.reply_text(
