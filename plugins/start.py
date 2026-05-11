@@ -215,7 +215,21 @@ Your Referrals:
             await client.send_cached_media(
                 chat_id=message.chat.id,
                 file_id=file_data["file_id"],
-                caption=file_data["file_name"]
+                # caption=file_data["file_name"]
+                caption=f"""
+                        📂 {file_data['file_name']}
+                        
+                        ═══════════════════════
+                        
+                        ➜ 𝐔𝐩𝐝𝐚𝐭𝐞𝐬 @ZLIXOfficial
+                        ➜ 𝐌𝐨𝐯𝐢𝐞𝐬 @Moviewallahz_Official
+                        ➜ 𝐒𝐮𝐩𝐩𝐨𝐫𝐭 @ZLIXSupport
+                        ➜ 𝐏𝐫𝐞𝐦𝐢𝐮𝐦 @ZlixPremium
+                        
+                        ═══════════════════════
+                        
+                        ♥️ 𝗧𝗲𝗮𝗺 ➜ @ZLIXOfficial
+                        """
             )
 
         except Exception as e:
