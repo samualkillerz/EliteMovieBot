@@ -23,27 +23,43 @@ async def search_files(query):
         ""
     )
 
+    words = query.split()
+
+    regex_pattern = ".*".join(words)
+
     files = files_db.find(
         {
             "$or": [
+
+                # NORMAL SEARCH
                 {
                     "search_name": {
-                        "$regex": query,
+                        "$regex": regex_pattern,
                         "$options": "i"
                     }
                 },
+
+                # COMPACT SEARCH
                 {
                     "search_compact": {
+                        "$regex": compact_query,
+                        "$options": "i"
+                    }
+                },
+
+                # REVERSED MATCH
+                {
+                    "search_name": {
                         "$regex": compact_query,
                         "$options": "i"
                     }
                 }
             ]
         }
-    ).limit(10)
+    ).limit(15)
 
     return await files.to_list(
-        length=10
+        length=15
     )
 
 
