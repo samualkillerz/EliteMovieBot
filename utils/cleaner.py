@@ -46,7 +46,9 @@ def clean_file_name(name):
 
         r"Official",
 
-        r"RymOfficial"
+        r"RymOfficial",
+
+        r"SkymoviesHD",
     ]
 
     for pattern in patterns:
