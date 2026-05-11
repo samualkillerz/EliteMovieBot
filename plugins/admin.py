@@ -119,7 +119,7 @@ async def admin_media_handler(client, message: Message):
         "message_id": forwarded.id,
         "search_name": normalize_query(
             media.file_name
-        )
+        ),
         "search_compact": normalize_query(
             media.file_name
         ).replace(" ", ""),
