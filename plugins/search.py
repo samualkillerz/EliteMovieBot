@@ -104,23 +104,39 @@ async def search_handler(client, message: Message):
             )
         )
 
-    # NOT FOUND
+    
+    # TMDB CHECK
+    movie = await search_tmdb(query)
+    
+    if not movie:
+    
+        return await message.reply_text(
+            """
+    ❌ Movie/Series not found.
+    
+    Use proper format.
+    
+    Example:
+    Iron Man 2008
+    """
+        )
+    
+    # SAVE REQUEST
     request_data = await get_request(query)
-
+    
     if not request_data:
-
+    
         await create_request(
             query,
             message.from_user.id
         )
-
+    
     else:
-
+    
         await add_request_user(
             query,
             message.from_user.id
         )
-
     # GROUP RESPONSE
     if message.chat.type in [
         "group",
