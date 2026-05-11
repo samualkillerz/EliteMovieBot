@@ -2,8 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
     InlineKeyboardMarkup,
-    InlineKeyboardButton,
-    CallbackQuery
+    InlineKeyboardButton
 )
 
 from database.mongo import files_db
@@ -13,22 +12,25 @@ from database.users import (
     add_user,
     get_user,
     add_referral,
-    unlock_user
+    unlock_user,
+    add_credits
 )
 
 from utils.checks import check_force_sub
 from utils.filters import is_admin
 
 from config import (
-    FORCE_SUB_CHANNELS,
-    ADMINS
+    FORCE_SUB_CHANNELS
 )
 
 
 BOT_USERNAME = "LordVT4ProBot"
 
 
-@Client.on_message(filters.private & filters.command("start"))
+@Client.on_message(
+    filters.private &
+    filters.command("start")
+)
 async def start_command(client, message: Message):
 
     user_id = message.from_user.id
@@ -41,6 +43,7 @@ async def start_command(client, message: Message):
     if len(message.command) > 1:
         payload = message.command[1]
 
+    # NEW USER
     if not await is_user_exist(user_id):
 
         await add_user(user_id, name)
@@ -48,25 +51,38 @@ async def start_command(client, message: Message):
         if admin:
             await unlock_user(user_id)
 
+        # REFERRAL SYSTEM
         if payload and payload.startswith("ref_"):
 
-            referrer = int(
-                payload.replace("ref_", "")
-            )
+            try:
 
-            if referrer != user_id:
-
-                await add_referral(referrer)
-                await add_credits(referrer, 2)
-
-                ref_data = await get_user(
-                    referrer
+                referrer = int(
+                    payload.replace("ref_", "")
                 )
 
-                if ref_data["referrals"] >= 1:
+                if referrer != user_id:
 
-                    await unlock_user(referrer)
+                    await add_referral(referrer)
 
+                    await add_credits(
+                        referrer,
+                        2
+                    )
+
+                    ref_data = await get_user(
+                        referrer
+                    )
+
+                    if ref_data["referrals"] >= 1:
+
+                        await unlock_user(
+                            referrer
+                        )
+
+            except Exception as e:
+                print(e)
+
+    # FORCE SUB CHECK
     joined = await check_force_sub(
         client,
         user_id
@@ -78,33 +94,44 @@ async def start_command(client, message: Message):
 
         for channel in FORCE_SUB_CHANNELS:
 
-            chat = await client.get_chat(channel)
+            try:
 
-            if chat.username:
-
-                url = (
-                    f"https://t.me/"
-                    f"{chat.username}"
+                chat = await client.get_chat(
+                    channel
                 )
 
-            else:
+                if chat.username:
 
-                url = "https://t.me"
-
-            buttons.append(
-                [
-                    InlineKeyboardButton(
-                        chat.title,
-                        url=url
+                    url = (
+                        f"https://t.me/"
+                        f"{chat.username}"
                     )
-                ]
-            )
+
+                else:
+
+                    url = "https://t.me"
+
+                buttons.append(
+                    [
+                        InlineKeyboardButton(
+                            chat.title,
+                            url=url
+                        )
+                    ]
+                )
+
+            except Exception as e:
+                print(e)
 
         buttons.append(
             [
                 InlineKeyboardButton(
                     "Try Again",
-                    url=f"https://t.me/{BOT_USERNAME}?start={payload}"
+                    url=(
+                        f"https://t.me/"
+                        f"{BOT_USERNAME}"
+                        f"?start={payload or ''}"
+                    )
                 )
             ]
         )
@@ -116,9 +143,15 @@ async def start_command(client, message: Message):
             )
         )
 
+    # USER DATA
     user_data = await get_user(user_id)
 
-    if not user_data["unlocked"] and not admin:
+    # LOCK SYSTEM
+    if (
+        user_data and
+        not user_data["unlocked"] and
+        not admin
+    ):
 
         referral_link = (
             f"https://t.me/{BOT_USERNAME}"
@@ -130,13 +163,18 @@ async def start_command(client, message: Message):
                 [
                     InlineKeyboardButton(
                         "Invite Friend",
-                        url=f"https://t.me/share/url?url={referral_link}"
+                        url=(
+                            "https://t.me/share/url"
+                            f"?url={referral_link}"
+                        )
                     )
                 ],
                 [
                     InlineKeyboardButton(
                         "Request Access",
-                        callback_data=f"request#{user_id}"
+                        callback_data=(
+                            f"request#{user_id}"
+                        )
                     )
                 ]
             ]
@@ -154,10 +192,12 @@ Your Referrals:
             reply_markup=buttons
         )
 
+    # FILE DELIVERY
     if payload and payload.startswith("file_"):
 
         deep_link = payload.replace(
-            "file_", ""
+            "file_",
+            ""
         )
 
         file_data = await files_db.find_one(
@@ -167,7 +207,7 @@ Your Referrals:
         if not file_data:
 
             return await message.reply_text(
-                "File not found."
+                "❌ File not found."
             )
 
         try:
@@ -180,12 +220,15 @@ Your Referrals:
 
         except Exception as e:
 
+            print(e)
+
             return await message.reply_text(
                 f"ERROR:\n{e}"
             )
 
         return
 
+    # DEFAULT START
     await message.reply_text(
         "✅ Access Unlocked"
     )
