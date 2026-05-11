@@ -8,7 +8,7 @@ API_HASH = getenv("API_HASH")
 BOT_TOKEN = getenv("BOT_TOKEN")
 
 MONGO_URI = getenv("MONGO_URI")
-TMDB_API = getenv(TMDB_API)
+TMDB_API = getenv("TMDB_API")
 
 ADMINS = list(map(int, getenv("ADMINS").split()))
 
