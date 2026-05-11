@@ -1,4 +1,5 @@
 from utils.cooldown import check_cooldown
+from utils.tmdb import search_tmdb
 
 from pyrogram import Client, filters
 from pyrogram.types import (
