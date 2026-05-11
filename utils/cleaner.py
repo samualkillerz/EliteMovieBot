@@ -1,7 +1,7 @@
 import re
 
 
-BRANDING = "@LordVT4Pro"
+BRANDING = "@LordVT4ProBot"
 
 
 def clean_file_name(name):
