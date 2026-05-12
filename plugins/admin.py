@@ -136,7 +136,8 @@ async def admin_media_handler(client, message: Message):
 
         "search_name": normalized_name,
 
-        "search_compact": compact_name
+        "search_compact": compact_name, #both work same this one and below one
+        # "search_compact": normalize_query(media.file_name).replace(" ", "")  # use this or above one
     }
 
     await add_file(data)
