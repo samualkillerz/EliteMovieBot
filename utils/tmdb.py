@@ -33,10 +33,16 @@ async def search_tmdb(query):
         year = ""
 
         if result.get("release_date"):
-            year = result["release_date"][:4]
+
+            year = result[
+                "release_date"
+            ][:4]
 
         elif result.get("first_air_date"):
-            year = result["first_air_date"][:4]
+
+            year = result[
+                "first_air_date"
+            ][:4]
 
         poster = None
 
@@ -47,24 +53,14 @@ async def search_tmdb(query):
                 f"{result['poster_path']}"
             )
 
-        rating = result.get(
-            "vote_average",
-            0
-        )
-
-        overview = result.get(
-            "overview",
-            "No description available."
-        )
-
         return {
             "title": title,
             "year": year,
-            "poster": poster,
-            "rating": rating,
-            "overview": overview
+            "poster": poster
         }
 
     except Exception as e:
+
         print(e)
+
         return None
