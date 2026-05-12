@@ -51,71 +51,70 @@ async def start_command(client, message: Message):
         if admin:
             await unlock_user(user_id)
 
-        # REFERRAL SYSTEM
-        # Old Paylod  
-        # if payload and payload.startswith("ref_"):
+        # REFERRAL SYSTEM  
+        if payload and payload.startswith("ref_"):
 
-        #     try:
+            try:
 
-        #         referrer = int(
-        #             payload.replace("ref_", "")
-        #         )
+                referrer = int(
+                    payload.replace("ref_", "")
+                )
 
-        #         if referrer != user_id:
+                if referrer != user_id:
 
-        #             await add_referral(referrer)
+                    await add_referral(referrer)
 
-        #             await add_credits(
-        #                 referrer,
-        #                 2
-        #             )
+                    await add_credits(
+                        referrer,
+                        2
+                    )
 
-        #             ref_data = await get_user(
-        #                 referrer
-        #             )
+                    ref_data = await get_user(
+                        referrer
+                    )
 
-        #             if ref_data["referrals"] >= 1:
+                    if ref_data["referrals"] >= 1:
 
-        #                 await unlock_user(
-        #                     referrer
-        #                 )
+                        await unlock_user(
+                            referrer
+                        )
 
-        #     except Exception as e:
-        #         print(e)
+            except Exception as e:
+                print(e)
         
-    #New Paylod 
-    if payload and payload.startswith("ref_"):
+    # #New Paylod 
+    # if payload and payload.startswith("ref_"):
 
-    referrer = int(
-        payload.replace("ref_", "")
-    )
+    # referrer = int(
+    #     payload.replace("ref_", "")
+    # )
 
-    already_referred = user_data.get(
-        "referred_by"
-    )
+    # already_referred = user_data.get(
+    #     "referred_by"
+    # )
 
-    if (
-        referrer != user_id and
-        not already_referred
-    ):
+    # if (
+    #     referrer != user_id and
+    #     not already_referred
+    # ):
 
-        await users_db.update_one(
-            {"user_id": user_id},
-            {
-                "$set": {
-                    "referred_by": referrer
-                }
-            }
-        )
+    #     await users_db.update_one(
+    #         {"user_id": user_id},
+    #         {
+    #             "$set": {
+    #                 "referred_by": referrer
+    #             }
+    #         }
+    #     )
 
-        await add_referral(referrer)
-        await add_credits(referrer, 2)
+    #     await add_referral(referrer)
+    #     await add_credits(referrer, 2)
 
-        ref_data = await get_user(referrer)
+    #     ref_data = await get_user(referrer)
 
-        if ref_data["referrals"] >= 1:
+    #     if ref_data["referrals"] >= 1:
 
-            await unlock_user(referrer)
+    #         await unlock_user(referrer)
     # FORCE SUB CHECK
     joined = await check_force_sub(
         client,
