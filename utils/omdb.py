@@ -5,17 +5,22 @@ from config import OMDB_API
 
 async def search_omdb(query):
 
-    url = (
-        "https://www.omdbapi.com/"
-        f"?apikey={OMDB_API}"
-        f"&t={query}"
-    )
-
     try:
 
-        response = requests.get(url)
+        url = (
+            "https://www.omdbapi.com/"
+            f"?apikey={OMDB_API}"
+            f"&t={query}"
+        )
+
+        response = requests.get(
+            url,
+            timeout=15
+        )
 
         data = response.json()
+
+        print(data)
 
         if data.get("Response") == "False":
             return None
@@ -44,6 +49,6 @@ async def search_omdb(query):
 
     except Exception as e:
 
-        print(e)
+        print("OMDB ERROR:", e)
 
         return None
