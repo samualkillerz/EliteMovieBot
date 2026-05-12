@@ -1,4 +1,5 @@
 from utils.cooldown import check_cooldown
+from utils.metadata import get_metadata
 
 from pyrogram import Client, filters
 from pyrogram.types import (
@@ -109,22 +110,115 @@ async def search_handler(client, message: Message):
         )
 
     # NOT FOUND
+    # request_data = await get_request(query)
+
+    # if not request_data:
+
+    #     await create_request(
+    #         query,
+    #         message.from_user.id
+    #     )
+
+    # else:
+
+    #     await add_request_user(
+    #         query,
+    #         message.from_user.id
+    #     )
+
+
+
+        # GET METADATA
+    meta = await get_metadata(query)
+    
+    # INVALID REQUEST
+    if not meta:
+    
+        return await message.reply_text(
+            """
+    ❌ Movie/Series not found.
+    
+    Use proper format.
+    
+    Example:
+    Iron Man 2008
+    """
+        )
+    
+    # SAVE REQUEST
     request_data = await get_request(query)
-
+    
     if not request_data:
-
+    
         await create_request(
             query,
             message.from_user.id
         )
-
+    
     else:
-
+    
         await add_request_user(
             query,
             message.from_user.id
         )
+    
+    # GROUP RESPONSE
+    if message.chat.type in [
+        "group",
+        "supergroup"
+    ]:
+    
+        return await message.reply_text(
+            f"""
+    ✅ Request Added
+    
+    🎬 {meta['title']} ({meta['year']})
+    ⭐ IMDb: {meta['rating']}
+    """
+        )
+    
+    # BUTTONS
+    buttons = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "Request Added ✅",
+                    callback_data="requested"
+                )
+            ]
+        ]
+    )
+    
+    caption = f"""
+    🎬 {meta['title']} ({meta['year']})
+    
+    ⭐ IMDb: {meta['rating']}
+    🎭 {meta['genre']}
+    
+    📝 {meta['plot'][:200]}
+    
+    ✅ Request Added Successfully
+    """
+    
+    # SEND POSTER
+    if meta["poster"]:
+    
+        return await message.reply_photo(
+            photo=meta["poster"],
+            caption=caption,
+            reply_markup=buttons
+        )
+    
+    # FALLBACK
+    return await message.reply_text(
+        caption,
+        reply_markup=buttons
+    )
 
+
+
+
+    
     # GROUP RESPONSE
     if message.chat.type in [
         "group",
