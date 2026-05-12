@@ -5,17 +5,22 @@ from config import TMDB_API
 
 async def search_tmdb(query):
 
-    url = (
-        "https://api.themoviedb.org/3/search/multi"
-        f"?api_key={TMDB_API}"
-        f"&query={query}"
-    )
-
     try:
 
-        response = requests.get(url)
+        url = (
+            "https://api.themoviedb.org/3/search/movie"
+            f"?api_key={TMDB_API}"
+            f"&query={query}"
+        )
+
+        response = requests.get(
+            url,
+            timeout=15
+        )
 
         data = response.json()
+
+        print(data)
 
         results = data.get("results")
 
@@ -24,9 +29,8 @@ async def search_tmdb(query):
 
         result = results[0]
 
-        title = (
-            result.get("title") or
-            result.get("name") or
+        title = result.get(
+            "title",
             "Unknown"
         )
 
@@ -36,12 +40,6 @@ async def search_tmdb(query):
 
             year = result[
                 "release_date"
-            ][:4]
-
-        elif result.get("first_air_date"):
-
-            year = result[
-                "first_air_date"
             ][:4]
 
         poster = None
@@ -61,6 +59,6 @@ async def search_tmdb(query):
 
     except Exception as e:
 
-        print(e)
+        print("TMDB ERROR:", e)
 
         return None
