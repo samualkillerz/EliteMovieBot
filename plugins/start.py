@@ -245,7 +245,7 @@ Your Referrals:
             )
 
         try:
-            thumb = await get_thumb()
+            
             await client.send_cached_media(
                 chat_id=message.chat.id,
                 file_id=file_data["file_id"],
