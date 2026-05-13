@@ -13,11 +13,27 @@ async def is_user_exist(user_id):
 async def add_user(user_id, name):
 
     data = {
+        # "user_id": user_id,  #
+        # "name": name,        #   Old users credit data
+        # "credits": 5,        #
+        # "referrals": 0,
+        # "unlocked": False
         "user_id": user_id,
         "name": name,
-        "credits": 5,
+    
         "referrals": 0,
-        "unlocked": False
+        "unlocked": False,
+    
+        "credits": 0,
+    
+        "premium": False,
+        "vip": False,
+    
+        "priority_access": False,
+    
+        "premium_expire": None,
+    
+        "referred_by": None
     }
 
     await users_db.insert_one(data)
