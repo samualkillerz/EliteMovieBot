@@ -1,7 +1,6 @@
-from database.settings import get_thumb
 from pyrogram import Client, filters
 from pyrogram.types import (
-    Message,
+    Message,z
     InlineKeyboardMarkup,
     InlineKeyboardButton
 )
