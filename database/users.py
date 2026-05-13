@@ -34,11 +34,7 @@ async def add_user(user_id, name):
         "premium_expire": None,
     
         "referred_by": None,
-        
-        
-        "is_premium": False,
-        "is_vip": False,
-        "high_priority": False,
+
     }
 
     await users_db.insert_one(data)
