@@ -92,3 +92,69 @@ async def remove_credits(user_id, amount):
         }
     )
 
+
+
+
+
+
+async def add_credits(user_id, amount):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$inc": {
+                "credits": amount
+            }
+        }
+    )
+
+
+async def remove_credits(user_id, amount):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$inc": {
+                "credits": -amount
+            }
+        }
+    )
+
+
+async def set_premium(user_id, value=True):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$set": {
+                "premium": value
+            }
+        }
+    )
+
+
+async def set_vip(user_id, value=True):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$set": {
+                "vip": value
+            }
+        }
+    )
+
+
+async def set_priority_access(
+    user_id,
+    value=True
+):
+
+    await users_db.update_one(
+        {"user_id": user_id},
+        {
+            "$set": {
+                "priority_access": value
+            }
+        }
+    )
